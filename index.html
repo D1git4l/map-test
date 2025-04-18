@@ -1,145 +1,329 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Radar en Temps Réel</title>
-  <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
-  <style>
-    body {
-      font-family: Arial, sans-serif;
-      margin: 0;
-      padding: 0;
-      display: flex;
-      background-color: #eef2f3;
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Carte avec marqueurs</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-measure/dist/leaflet-measure.css">
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+        }
+        #sidebar {
+            width: 250px;
+            background: #f4f4f4;
+            padding: 10px;
+            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+            overflow-y: auto;
+        }
+        #map {
+            flex-grow: 1;
+            height: 100vh;
+            min-width: 500px;
+        }
+        .info-box {
+            margin-bottom: 10px;
+            padding: 10px;
+            background: white;
+            border: 1px solid #ccc;
+        }
+        .toggle-button {
+            background: #007BFF;
+            color: white;
+            padding: 10px;
+            border: none;
+            cursor: pointer;
+            width: 100%;
+            margin-top: 5px;
+        }
+        .toggle-button:hover {
+            background: #0056b3;
+        }
+        .checkbox-group {
+            margin-top: 20px;
+        }
+        .category-group {
+            margin-top: 20px;
+        }
+        .category-group h4 {
+            font-size: 16px;
+            font-weight: bold;
+        }
+        .category-checkboxes {
+            display: none;
+            margin-left: 20px;
+        }
+        .category-checkboxes label {
+            display: block;
+        }
+        .category-group.open .category-checkboxes {
+            display: block;
+        }
 
-    #sidebar {
-      width: 250px;
-      background: #f4f4f4;
-      padding: 10px;
-      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
-      overflow-y: auto;
-    }
+        /* Ajouter les styles pour aligner préfixe et numéro sur la même ligne */
+        #customCallsignFields {
+            display: flex;
+            gap: 10px;
+            margin-top: 5px;
+        }
 
-    .info-box {
-      margin-bottom: 10px;
-      padding: 10px;
-      background: white;
-      border: 1px solid #ccc;
-    }
+        #customCallsignFields input {
+            width: 80px; /* Taille ajustée */
+        }
 
-    .radar-button {
-      background: #007BFF;
-      color: white;
-      padding: 10px;
-      border: none;
-      cursor: pointer;
-      width: 100%;
-      margin-top: 10px;
-      font-size: 16px;
-      border-radius: 6px;
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      text-decoration: none;
-      transition: background 0.3s ease;
-    }
+        /* Style pour la fenêtre modale */
+        .modal {
+            display: none; /* Par défaut la modale est cachée */
+            position: fixed;
+            z-index: 1; /* Assurez-vous que la modale se trouve au-dessus de tout le contenu */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4); /* Fond semi-transparent */
+            overflow: auto;
+        }
 
-    .radar-button:hover {
-      background: #0056b3;
-    }
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 800px;
+            position: relative;
+        }
 
-    .radar-button i {
-      font-size: 18px;
-    }
+        .modal-header {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
 
-    #content {
-      flex-grow: 1;
-      padding: 20px;
-    }
+        .modal-footer {
+            margin-top: 20px;
+            text-align: right;
+        }
 
-    /* Style pour la fenêtre modale */
-    .modal {
-      display: none; /* Par défaut la modale est cachée */
-      position: fixed;
-      z-index: 1; /* Assurez-vous que la modale se trouve au-dessus de tout le contenu */
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.4); /* Fond semi-transparent */
-      overflow: auto;
-    }
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
 
-    .modal-content {
-      background-color: #fff;
-      margin: 15% auto;
-      padding: 20px;
-      width: 80%;
-      max-width: 800px;
-      position: relative;
-    }
-
-    .modal-header {
-      font-size: 20px;
-      font-weight: bold;
-      margin-bottom: 10px;
-    }
-
-    .modal-footer {
-      margin-top: 20px;
-      text-align: right;
-    }
-
-    .close {
-      color: #aaa;
-      font-size: 28px;
-      font-weight: bold;
-      position: absolute;
-      top: 10px;
-      right: 20px;
-    }
-
-    .close:hover,
-    .close:focus {
-      color: black;
-      text-decoration: none;
-      cursor: pointer;
-    }
-  </style>
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+    </style>
 </head>
 <body>
-  <div id="sidebar">
-    <h2>Radar FSHub</h2>
-    <div class="info-box">
-      <p>Suivez les vols en temps réel en cliquant ci-dessous :</p>
-      <!-- Lien pour ouvrir la petite fenêtre -->
-      <button class="radar-button" onclick="openRadarWindow()">
-        <i class="fas fa-satellite-dish"></i> Ouvrir le Radar
-      </button>
+    <div id="sidebar">
+        <h2>Sélection des aéroports</h2>
+        <div class="info-box">
+            Départ: <span id="departure" class="clickable">Non sélectionné</span>
+            <input type="text" id="departureInput" style="display:none" placeholder="Entrez un aéroport">
+        </div>
+        <div class="info-box">
+            Arrivée: <span id="arrival" class="clickable">Non sélectionné</span>
+            <input type="text" id="arrivalInput" style="display:none" placeholder="Entrez un aéroport">
+        </div>
+        <div class="info-box">
+            <label>Callsign :</label>
+            <span style="font-weight:bold;" id="callsignDisplayPrefix">AZH</span>-<span id="callsignDisplayNumber">201</span>
+            <select id="callsign" name="callsign">
+                <option value="">Sélectionner un numéro</option>
+                <option value="201">201</option>
+                <option value="202">202</option>
+                <option value="203">203</option>
+                <option value="204">204</option>
+                <option value="205">205</option>
+                <option value="206">206</option>
+                <option value="FR">FR</option>
+                <option value="US">US</option>
+                <option value="ACC">ACC</option>
+                <option value="501">501</option>
+                <option value="502">502</option>
+                <option value="503">503</option>
+                <option value="504">504</option>
+                <option value="505">505</option>
+                <option value="506">506</option>
+                <option value="507">507</option>
+                <option value="other">Autre (saisir un callsign)</option>
+            </select>
+            <div id="customCallsignFields" style="display:none;">
+                <input type="text" id="customAirline" placeholder="Préfixe (ex: XYZ)">
+                <input type="text" id="customNumber" placeholder="Numéro (ex: 123)">
+            </div>
+        </div>
+
+        <!-- Bouton pour ouvrir la modale -->
+        <button class="radar-button" onclick="openModal()">
+            <i class="fas fa-satellite-dish"></i> Ouvrir le Radar
+        </button>
+
+        <!-- Fenêtre modale -->
+        <div id="myModal" class="modal">
+            <div class="modal-content">
+                <span class="close" onclick="closeModal()">&times;</span>
+                <div class="modal-header">
+                    <h2>Radar en Temps Réel</h2>
+                </div>
+                <div class="modal-body">
+                    <p>Visualisez les informations en temps réel sur les vols.</p>
+                    <button class="radar-button" onclick="openRadarWindow()">
+                        <i class="fas fa-satellite-dish"></i> Ouvrir le Radar
+                    </button>
+                </div>
+                <div class="modal-footer">
+                    <button onclick="closeModal()">Fermer</button>
+                </div>
+            </div>
+        </div>
+
     </div>
-  </div>
 
-  <div id="content">
-    <h1>Bienvenue chez AZH Virtual</h1>
-    <p>Gérez vos opérations, suivez vos pilotes et restez connectés au réseau.</p>
-  </div>
+    <div id="map"></div>
 
-  <script>
-    // Fonction pour ouvrir une petite fenêtre pop-up avec le lien du radar
-    function openRadarWindow() {
-      const radarUrl = "https://fshub.io/airline/AZH/radar";
-      const windowWidth = 800; // Largeur de la fenêtre pop-up
-      const windowHeight = 600; // Hauteur de la fenêtre pop-up
-      const windowLeft = (window.innerWidth - windowWidth) / 2; // Calcul pour centrer la fenêtre
-      const windowTop = (window.innerHeight - windowHeight) / 2; // Calcul pour centrer la fenêtre
-      const windowOptions = `width=${windowWidth}, height=${windowHeight}, top=${windowTop}, left=${windowLeft}, resizable=yes, scrollbars=yes`;
+    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <script>
+        const callsignSelect = document.getElementById('callsign');
+        const customFields = document.getElementById('customCallsignFields');
+        const customAirline = document.getElementById('customAirline');
+        const customNumber = document.getElementById('customNumber');
+        const callsignDisplayPrefix = document.getElementById('callsignDisplayPrefix');
+        const callsignDisplayNumber = document.getElementById('callsignDisplayNumber');
 
-      // Ouvrir la fenêtre pop-up avec les options spécifiées
-      window.open(radarUrl, "Radar", windowOptions);
-    }
-  </script>
+        callsignSelect.addEventListener('change', function () {
+            if (this.value === 'other') {
+                customFields.style.display = 'flex';  // Affiche les champs sur une même ligne
+                customAirline.focus();
+                callsignDisplayPrefix.innerText = ''; // Ne rien afficher pour le préfixe
+                callsignDisplayNumber.innerText = ''; // Ne rien afficher pour le numéro
+            } else {
+                customFields.style.display = 'none';
+                callsignDisplayPrefix.innerText = "AZH"; // Affiche le préfixe
+                callsignDisplayNumber.innerText = this.value; // Affiche le numéro sélectionné
+            }
+        });
+
+        function getCallsignFinal() {
+            if (callsignSelect.value === 'other') {
+                const prefix = customAirline.value.trim().toUpperCase();
+                const number = customNumber.value.trim();
+                return prefix && number ? prefix + number : "";
+            } else {
+                return "AZH" + callsignSelect.value;
+            }
+        }
+
+        function updateCallsign() {
+            const finalCallsign = getCallsignFinal();
+            if (finalCallsign) {
+                const prefix = finalCallsign.slice(0, 3); // Les 3 premiers caractères sont le préfixe
+                const number = finalCallsign.slice(3); // Le reste est le numéro
+                callsignDisplayPrefix.innerText = prefix;
+                callsignDisplayNumber.innerText = number;
+            }
+        }
+
+        customAirline.addEventListener('input', updateCallsign);
+        customNumber.addEventListener('input', updateCallsign);
+
+        const map = L.map('map').setView([20, 0], 2);
+        L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributeurs'
+        }).addTo(map);
+
+        const layers = {}; // Chaque catégorie sera un layer distinct
+        let departureMarker = null;
+        let arrivalMarker = null;
+        let currentSelection = ''; // Suivi de la sélection Départ/Arrivée
+        let routeLine = null;  // Variable pour stocker la ligne tracée
+
+        // Fonction pour gérer l'entrée manuelle d'aéroport
+        function handleAirportInput(inputId, markerType) {
+            const input = document.getElementById(inputId);
+            const name = input.value.trim();
+            if (name) {
+                // Recherche de l'aéroport via OpenStreetMap API
+                fetch(`https://nominatim.openstreetmap.org/search?format=json&q=${name}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data && data.length > 0) {
+                            const lat = parseFloat(data[0].lat);
+                            const lon = parseFloat(data[0].lon);
+                            const popupMessage = `${name}<br>Latitude: ${lat}<br>Longitude: ${lon}`;
+                            
+                            // En fonction de l'aéroport de départ ou d'arrivée, on place le marqueur
+                            if (markerType === 'departure') {
+                                if (departureMarker) {
+                                    map.removeLayer(departureMarker); // Retirer le précédent marqueur
+                                }
+                                departureMarker = L.marker([lat, lon]).addTo(map)
+                                    .bindPopup(popupMessage)
+                                    .openPopup();
+                                document.getElementById('departure').innerText = name;
+                            } else if (markerType === 'arrival') {
+                                if (arrivalMarker) {
+                                    map.removeLayer(arrivalMarker); // Retirer le précédent marqueur
+                                }
+                                arrivalMarker = L.marker([lat, lon]).addTo(map)
+                                    .bindPopup(popupMessage)
+                                    .openPopup();
+                                document.getElementById('arrival').innerText = name;
+                            }
+
+                            // Fermer le champ de texte après la saisie
+                            input.style.display = 'none';
+
+                            // Si un départ et une arrivée sont sélectionnés, on calcule la distance
+                            if (departureMarker && arrivalMarker) {
+                                calculateDistanceAndTime(departureMarker.getLatLng(), arrivalMarker.getLatLng());
+                            }
+                        } else {
+                            alert("Aéroport introuvable, veuillez vérifier le nom.");
+                        }
+                    })
+                    .catch(error => {
+                        alert("Erreur lors de la recherche de l'aéroport.");
+                        console.error(error);
+                    });
+            }
+        }
+
+        // Fonction pour ouvrir la modale
+        function openModal() {
+            const modal = document.getElementById('myModal');
+            modal.style.display = 'block';
+        }
+
+        // Fonction pour fermer la modale
+        function closeModal() {
+            const modal = document.getElementById('myModal');
+            modal.style.display = 'none';
+        }
+
+        // Fonction pour ouvrir le radar dans une nouvelle fenêtre
+        function openRadarWindow() {
+            const radarUrl = "https://fshub.io/airline/AZH/radar";
+            const windowWidth = 800; // Largeur de la fenêtre pop-up
+            const windowHeight = 600; // Hauteur de la fenêtre pop-up
+            const windowLeft = (window.innerWidth - windowWidth) / 2; // Calcul pour centrer la fenêtre
+            const windowTop = (window.innerHeight - windowHeight) / 2; // Calcul pour centrer la fenêtre
+            const windowOptions = `width=${windowWidth}, height=${windowHeight}, top=${windowTop}, left=${windowLeft}, resizable=yes, scrollbars=yes`;
+
+            // Ouvrir la fenêtre pop-up avec les options spécifiées
+            window.open(radarUrl, "Radar", windowOptions);
+        }
+    </script>
 </body>
 </html>
