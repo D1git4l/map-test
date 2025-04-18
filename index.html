@@ -1,156 +1,163 @@
 <!DOCTYPE html>
 <html lang="fr">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Radar en Temps Réel</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            margin: 0;
-            padding: 0;
-            display: flex;
-        }
-        #sidebar {
-            width: 250px;
-            background: #f4f4f4;
-            padding: 10px;
-            box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
-            overflow-y: auto;
-        }
-        .info-box {
-            margin-bottom: 10px;
-            padding: 10px;
-            background: white;
-            border: 1px solid #ccc;
-        }
-        .toggle-button {
-            background: #007BFF;
-            color: white;
-            padding: 10px;
-            border: none;
-            cursor: pointer;
-            width: 100%;
-            margin-top: 5px;
-        }
-        .toggle-button:hover {
-            background: #0056b3;
-        }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Radar en Temps Réel</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      display: flex;
+    }
+    #sidebar {
+      width: 250px;
+      background: #f4f4f4;
+      padding: 10px;
+      box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
+      overflow-y: auto;
+      height: 100vh;
+    }
+    .info-box {
+      margin-bottom: 10px;
+      padding: 10px;
+      background: white;
+      border: 1px solid #ccc;
+    }
+    .toggle-button {
+      background: #007BFF;
+      color: white;
+      padding: 10px;
+      border: none;
+      cursor: pointer;
+      width: 100%;
+      margin-top: 5px;
+      border-radius: 5px;
+    }
+    .toggle-button:hover {
+      background: #0056b3;
+    }
 
-        /* Style pour la fenêtre modale */
-        .modal {
-            display: none; /* Par défaut la modale est cachée */
-            position: fixed;
-            z-index: 1; /* Assurez-vous que la modale se trouve au-dessus de tout le contenu */
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.4); /* Fond semi-transparent */
-            overflow: auto;
-        }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 999;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.4);
+      overflow: auto;
+    }
 
-        .modal-content {
-            background-color: #fff;
-            margin: 15% auto;
-            padding: 20px;
-            width: 80%;
-            max-width: 800px;
-            position: relative;
-        }
+    .modal-content {
+      background-color: #fff;
+      margin: 10% auto;
+      padding: 20px;
+      width: 80%;
+      max-width: 500px;
+      border-radius: 8px;
+      position: relative;
+      box-shadow: 0 5px 15px rgba(0,0,0,0.3);
+    }
 
-        .modal-header {
-            font-size: 20px;
-            font-weight: bold;
-            margin-bottom: 10px;
-        }
+    .modal-header {
+      font-size: 20px;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
 
-        .modal-footer {
-            margin-top: 20px;
-            text-align: right;
-        }
+    .modal-footer {
+      margin-top: 20px;
+      text-align: right;
+    }
 
-        .close {
-            color: #aaa;
-            font-size: 28px;
-            font-weight: bold;
-            position: absolute;
-            top: 10px;
-            right: 20px;
-        }
+    .close {
+      color: #aaa;
+      font-size: 28px;
+      font-weight: bold;
+      position: absolute;
+      top: 10px;
+      right: 20px;
+    }
 
-        .close:hover,
-        .close:focus {
-            color: black;
-            text-decoration: none;
-            cursor: pointer;
-        }
-    </style>
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+
+    #content {
+      flex-grow: 1;
+      padding: 20px;
+    }
+  </style>
 </head>
 <body>
-    <div id="sidebar">
-        <h2>Radar FSHub</h2>
-        <div class="info-box">
-            <p>Affichez le radar en temps réel en cliquant sur le bouton ci-dessous :</p>
-            <!-- Bouton pour ouvrir la fenêtre modale -->
-            <button id="showRadarButton" class="toggle-button">Afficher le Radar</button>
-        </div>
+  <div id="sidebar">
+    <h2>Radar FSHub</h2>
+    <div class="info-box">
+      <p>Affichez le radar en temps réel en cliquant sur le bouton ci-dessous :</p>
+      <button id="showRadarButton" class="toggle-button">Afficher le Radar</button>
     </div>
+  </div>
 
-    <!-- Contenu de la page -->
-    <div id="content" style="flex-grow: 1; padding: 20px;">
-        <!-- Contenu additionnel -->
+  <div id="content">
+    <h1>Bienvenue dans l'application</h1>
+    <p>Contenu principal ici...</p>
+  </div>
+
+  <!-- Fenêtre modale -->
+  <div id="myModal" class="modal">
+    <div class="modal-content">
+      <div class="modal-header">
+        Radar en Temps Réel
+        <span class="close">&times;</span>
+      </div>
+      <div class="modal-body">
+        <p>FSHub n'autorise pas l'intégration directe du radar dans cette page.</p>
+        <p>Cliquez ci-dessous pour l’ouvrir dans une nouvelle fenêtre :</p>
+        <button onclick="openRadar()" class="toggle-button">Ouvrir le Radar</button>
+      </div>
+      <div class="modal-footer">
+        <button id="closeModalButton" class="toggle-button">Fermer</button>
+      </div>
     </div>
+  </div>
 
-    <!-- Fenêtre modale -->
-    <div id="myModal" class="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                Radar en Temps Réel
-                <span class="close">&times;</span>
-            </div>
-            <div class="modal-body">
-                <p>Le radar est disponible via le lien ci-dessous. Cliquez pour l'ouvrir :</p>
-                <a href="https://fshub.io/airline/AZH/radar" target="_blank" class="toggle-button">Ouvrir le Radar</a>
-            </div>
-            <div class="modal-footer">
-                <button id="closeModalButton" class="toggle-button">Fermer</button>
-            </div>
-        </div>
-    </div>
+  <script>
+    const showRadarButton = document.getElementById('showRadarButton');
+    const modal = document.getElementById('myModal');
+    const closeModalButton = document.getElementById('closeModalButton');
+    const closeModalSpan = document.getElementsByClassName('close')[0];
 
-    <script>
-        // Récupérer les éléments du DOM
-        const showRadarButton = document.getElementById('showRadarButton');
-        const modal = document.getElementById('myModal');
-        const closeModalButton = document.getElementById('closeModalButton');
-        const closeModalSpan = document.getElementsByClassName('close')[0];
+    function openRadarModal() {
+      modal.style.display = "block";
+    }
 
-        // Fonction pour ouvrir la fenêtre modale
-        function openRadarModal() {
-            modal.style.display = "block";  // Afficher la modale
-        }
+    function closeRadarModal() {
+      modal.style.display = "none";
+    }
 
-        // Fonction pour fermer la fenêtre modale
-        function closeRadarModal() {
-            modal.style.display = "none";  // Masquer la modale
-        }
+    function openRadar() {
+      window.open(
+        'https://fshub.io/airline/AZH/radar',
+        '_blank',
+        'width=1200,height=800,noopener,noreferrer'
+      );
+    }
 
-        // Événement pour ouvrir la modale lorsque le bouton est cliqué
-        showRadarButton.addEventListener('click', openRadarModal);
+    showRadarButton.addEventListener('click', openRadarModal);
+    closeModalButton.addEventListener('click', closeRadarModal);
+    closeModalSpan.addEventListener('click', closeRadarModal);
 
-        // Événement pour fermer la modale lorsque le bouton "Fermer" est cliqué
-        closeModalButton.addEventListener('click', closeRadarModal);
-
-        // Événement pour fermer la modale lorsqu'on clique sur la croix
-        closeModalSpan.addEventListener('click', closeRadarModal);
-
-        // Fermer la modale si l'utilisateur clique à l'extérieur de la fenêtre modale
-        window.addEventListener('click', function(event) {
-            if (event.target === modal) {
-                closeRadarModal();
-            }
-        });
-    </script>
+    window.addEventListener('click', function (event) {
+      if (event.target === modal) {
+        closeRadarModal();
+      }
+    });
+  </script>
 </body>
 </html>
