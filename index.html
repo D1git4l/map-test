@@ -4,7 +4,7 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Radar en Temps Réel</title>
-  <!-- Font Awesome pour les icônes -->
+  <!-- Font Awesome pour l'icône -->
   <script src="https://kit.fontawesome.com/a076d05399.js" crossorigin="anonymous"></script>
   <style>
     body {
@@ -30,28 +30,29 @@
       border: 1px solid #ccc;
     }
 
-    .toggle-button {
+    .radar-button {
       background: #007BFF;
       color: white;
       padding: 10px;
       border: none;
       cursor: pointer;
       width: 100%;
-      margin-top: 5px;
+      margin-top: 10px;
       font-size: 16px;
+      border-radius: 6px;
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 10px;
-      border-radius: 6px;
+      gap: 8px;
+      text-decoration: none;
       transition: background 0.3s ease;
     }
 
-    .toggle-button:hover {
+    .radar-button:hover {
       background: #0056b3;
     }
 
-    .toggle-button i {
+    .radar-button i {
       font-size: 18px;
     }
 
@@ -59,144 +60,23 @@
       flex-grow: 1;
       padding: 20px;
     }
-
-    /* MODAL STYLING */
-    .modal {
-      display: none;
-      position: fixed;
-      z-index: 1;
-      left: 0;
-      top: 0;
-      width: 100%;
-      height: 100%;
-      background-color: rgba(0, 0, 0, 0.4);
-      overflow: auto;
-      animation: fadeIn 0.3s ease-in-out;
-    }
-
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-
-    .modal-content {
-      background-color: #fff;
-      margin: 5% auto;
-      padding: 20px;
-      width: 90%;
-      max-width: 700px;
-      position: relative;
-      border-radius: 12px;
-      box-shadow: 0 5px 20px rgba(0,0,0,0.3);
-      animation: slideIn 0.4s ease;
-    }
-
-    @keyframes slideIn {
-      from { transform: translateY(-30px); opacity: 0; }
-      to { transform: translateY(0); opacity: 1; }
-    }
-
-    .modal-header {
-      font-size: 22px;
-      font-weight: bold;
-      margin-bottom: 15px;
-      text-align: center;
-    }
-
-    .modal-body {
-      text-align: center;
-    }
-
-    .modal-body img {
-      width: 100%;
-      max-height: 350px;
-      object-fit: cover;
-      border-radius: 8px;
-      margin-bottom: 15px;
-    }
-
-    .modal-footer {
-      margin-top: 20px;
-      text-align: center;
-    }
-
-    .close {
-      color: #aaa;
-      font-size: 28px;
-      font-weight: bold;
-      position: absolute;
-      top: 10px;
-      right: 20px;
-    }
-
-    .close:hover,
-    .close:focus {
-      color: black;
-      text-decoration: none;
-      cursor: pointer;
-    }
   </style>
 </head>
 <body>
   <div id="sidebar">
     <h2>Radar FSHub</h2>
     <div class="info-box">
-      <p>Suivez nos vols en direct grâce à notre radar :</p>
-      <button id="showRadarButton" class="toggle-button">
-        <i class="fas fa-satellite-dish"></i> Afficher le Radar
-      </button>
+      <p>Suivez nos vols en direct :</p>
+      <!-- Lien vers le radar, ouvre dans un nouvel onglet -->
+      <a href="https://fshub.io/airline/AZH/radar" target="_blank" class="radar-button">
+        <i class="fas fa-satellite-dish"></i> Ouvrir le Radar
+      </a>
     </div>
   </div>
 
   <div id="content">
     <h1>Bienvenue chez AZH Virtual</h1>
-    <p>Suivez vos pilotes, planifiez des vols, et plus encore.</p>
+    <p>Gérez vos opérations, suivez vos pilotes et restez connectés au réseau.</p>
   </div>
-
-  <div id="myModal" class="modal">
-    <div class="modal-content">
-      <div class="modal-header">
-        Radar de Vol en Direct
-        <span class="close">&times;</span>
-      </div>
-      <div class="modal-body">
-        <img src="https://i.imgur.com/YmWrZpv.jpeg" alt="Aperçu du radar" />
-        <p>Le radar est disponible dans une nouvelle fenêtre. Cliquez ci-dessous :</p>
-        <a href="https://fshub.io/airline/AZH/radar" target="_blank" class="toggle-button">
-          <i class="fas fa-external-link-alt"></i> Ouvrir le Radar FSHub
-        </a>
-      </div>
-      <div class="modal-footer">
-        <button id="closeModalButton" class="toggle-button">
-          <i class="fas fa-times-circle"></i> Fermer
-        </button>
-      </div>
-    </div>
-  </div>
-
-  <script>
-    const showRadarButton = document.getElementById('showRadarButton');
-    const modal = document.getElementById('myModal');
-    const closeModalButton = document.getElementById('closeModalButton');
-    const closeModalSpan = document.getElementsByClassName('close')[0];
-
-    function openRadarModal() {
-      modal.style.display = "block";
-    }
-
-    function closeRadarModal() {
-      modal.style.display = "none";
-    }
-
-    showRadarButton.addEventListener('click', openRadarModal);
-    closeModalButton.addEventListener('click', closeRadarModal);
-    closeModalSpan.addEventListener('click', closeRadarModal);
-
-    window.addEventListener('click', function(event) {
-      if (event.target === modal) {
-        closeRadarModal();
-      }
-    });
-  </script>
 </body>
 </html>
