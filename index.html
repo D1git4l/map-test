@@ -18,11 +18,6 @@
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
             overflow-y: auto;
         }
-        #radarContainer {
-            width: 100%;
-            height: 100vh;
-            display: none;
-        }
         .info-box {
             margin-bottom: 10px;
             padding: 10px;
@@ -41,6 +36,55 @@
         .toggle-button:hover {
             background: #0056b3;
         }
+
+        /* Style pour la fenêtre modale */
+        .modal {
+            display: none; /* Par défaut la modale est cachée */
+            position: fixed;
+            z-index: 1; /* Assurez-vous que la modale se trouve au-dessus de tout le contenu */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.4); /* Fond semi-transparent */
+            overflow: auto;
+        }
+
+        .modal-content {
+            background-color: #fff;
+            margin: 15% auto;
+            padding: 20px;
+            width: 80%;
+            max-width: 800px;
+            position: relative;
+        }
+
+        .modal-header {
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+
+        .modal-footer {
+            margin-top: 20px;
+            text-align: right;
+        }
+
+        .close {
+            color: #aaa;
+            font-size: 28px;
+            font-weight: bold;
+            position: absolute;
+            top: 10px;
+            right: 20px;
+        }
+
+        .close:hover,
+        .close:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
     </style>
 </head>
 <body>
@@ -48,34 +92,67 @@
         <h2>Radar FSHub</h2>
         <div class="info-box">
             <p>Affichez le radar en temps réel en cliquant sur le bouton ci-dessous :</p>
-            <!-- Bouton pour afficher le radar -->
+            <!-- Bouton pour ouvrir la fenêtre modale -->
             <button id="showRadarButton" class="toggle-button">Afficher le Radar</button>
-        </div>
-
-        <div class="info-box" id="radarContainer">
-            <h3>Radar en temps réel</h3>
-            <!-- Iframe du radar -->
-            <iframe src="https://fshub.io/airline/AZH/radar" id="radarIframe" loading="lazy" width="100%" height="100%" style="border:none;"></iframe>
         </div>
     </div>
 
-    <!-- Contenu de la page sans carte -->
+    <!-- Contenu de la page -->
     <div id="content" style="flex-grow: 1; padding: 20px;">
-        <!-- Tout le contenu additionnel que tu souhaites ajouter -->
+        <!-- Contenu additionnel -->
+    </div>
+
+    <!-- Fenêtre modale -->
+    <div id="myModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                Radar en Temps Réel
+                <span class="close">&times;</span>
+            </div>
+            <div class="modal-body">
+                <p>Le radar est affiché ci-dessous :</p>
+                <div style="height: 400px; overflow: hidden;">
+                    <iframe src="https://fshub.io/airline/AZH/radar" width="100%" height="100%" style="border: none;"></iframe>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="closeModalButton" class="toggle-button">Fermer</button>
+            </div>
+        </div>
     </div>
 
     <script>
-        // Récupération des éléments HTML
+        // Récupérer les éléments du DOM
         const showRadarButton = document.getElementById('showRadarButton');
-        const radarContainer = document.getElementById('radarContainer');
-        
-        // Fonction pour afficher l'iframe du radar
-        function showRadar() {
-            radarContainer.style.display = 'block';  // Afficher l'iframe du radar
+        const modal = document.getElementById('myModal');
+        const closeModalButton = document.getElementById('closeModalButton');
+        const closeModalSpan = document.getElementsByClassName('close')[0];
+
+        // Fonction pour ouvrir la fenêtre modale
+        function openRadarModal() {
+            modal.style.display = "block";  // Afficher la modale
         }
 
-        // Event listener pour afficher le radar lorsqu'on clique sur le bouton
-        showRadarButton.addEventListener('click', showRadar);
+        // Fonction pour fermer la fenêtre modale
+        function closeRadarModal() {
+            modal.style.display = "none";  // Masquer la modale
+        }
+
+        // Événement pour ouvrir la modale lorsque le bouton est cliqué
+        showRadarButton.addEventListener('click', openRadarModal);
+
+        // Événement pour fermer la modale lorsque le bouton "Fermer" est cliqué
+        closeModalButton.addEventListener('click', closeRadarModal);
+
+        // Événement pour fermer la modale lorsqu'on clique sur la croix
+        closeModalSpan.addEventListener('click', closeRadarModal);
+
+        // Fermer la modale si l'utilisateur clique à l'extérieur de la fenêtre modale
+        window.addEventListener('click', function(event) {
+            if (event.target === modal) {
+                closeRadarModal();
+            }
+        });
     </script>
 </body>
 </html>
