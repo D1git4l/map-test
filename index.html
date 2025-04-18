@@ -3,9 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Carte avec marqueurs</title>
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/leaflet-measure/dist/leaflet-measure.css">
+    <title>Radar en Temps Réel</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -20,10 +18,10 @@
             box-shadow: 2px 0 5px rgba(0, 0, 0, 0.2);
             overflow-y: auto;
         }
-        #map {
-            flex-grow: 1;
+        #radarContainer {
+            width: 100%;
             height: 100vh;
-            min-width: 500px;
+            display: none;
         }
         .info-box {
             margin-bottom: 10px;
@@ -43,149 +41,41 @@
         .toggle-button:hover {
             background: #0056b3;
         }
-        .checkbox-group {
-            margin-top: 20px;
-        }
-        .category-group {
-            margin-top: 20px;
-        }
-        .category-group h4 {
-            font-size: 16px;
-            font-weight: bold;
-        }
-        .category-checkboxes {
-            display: none;
-            margin-left: 20px;
-        }
-        .category-group.open .category-checkboxes {
-            display: block;
-        }
-
-        /* Ajouter les styles pour aligner préfixe et numéro sur la même ligne */
-        #customCallsignFields {
-            display: flex;
-            gap: 10px;
-            margin-top: 5px;
-        }
-
-        #customCallsignFields input {
-            width: 80px; /* Taille ajustée */
-        }
-
-        /* Style de l'iframe */
-        #radarIframe {
-            display: none;
-            width: 100%;
-            height: 100vh;
-            border: none;
-        }
     </style>
 </head>
 <body>
     <div id="sidebar">
-        <h2>Sélection des aéroports</h2>
+        <h2>Radar FSHub</h2>
         <div class="info-box">
-            Départ: <span id="departure" class="clickable">Non sélectionné</span>
-            <input type="text" id="departureInput" style="display:none" placeholder="Entrez un aéroport">
-        </div>
-        <div class="info-box">
-            Arrivée: <span id="arrival" class="clickable">Non sélectionné</span>
-            <input type="text" id="arrivalInput" style="display:none" placeholder="Entrez un aéroport">
-        </div>
-        <div class="info-box">
-            <label>Callsign :</label>
-            <span style="font-weight:bold;" id="callsignDisplayPrefix">AZH</span>-<span id="callsignDisplayNumber">201</span>
-            <select id="callsign" name="callsign">
-                <option value="">Sélectionner un numéro</option>
-                <option value="201">201</option>
-                <option value="202">202</option>
-                <option value="203">203</option>
-                <option value="204">204</option>
-                <option value="205">205</option>
-                <option value="206">206</option>
-                <option value="FR">FR</option>
-                <option value="US">US</option>
-                <option value="ACC">ACC</option>
-                <option value="501">501</option>
-                <option value="502">502</option>
-                <option value="503">503</option>
-                <option value="504">504</option>
-                <option value="505">505</option>
-                <option value="506">506</option>
-                <option value="507">507</option>
-                <option value="other">Autre (saisir un callsign)</option>
-            </select>
-            <div id="customCallsignFields" style="display:none;">
-                <input type="text" id="customAirline" placeholder="Préfixe (ex: XYZ)">
-                <input type="text" id="customNumber" placeholder="Numéro (ex: 123)">
-            </div>
+            <p>Affichez le radar en temps réel en cliquant sur le bouton ci-dessous :</p>
+            <!-- Bouton pour afficher le radar -->
+            <button id="showRadarButton" class="toggle-button">Afficher le Radar</button>
         </div>
 
-        <button id="generateLinkButton" class="toggle-button">Générer le plan de vol</button>
-        <button id="resetSelectionButton" class="toggle-button">Réinitialiser les aéroports</button>
-        <div id="distanceBox" class="info-box" style="display:none;">
-            Distance: <span id="distance">0</span> milles nautiques<br>
-            Temps de vol: <span id="flightTime">0</span> heures
+        <div class="info-box" id="radarContainer">
+            <h3>Radar en temps réel</h3>
+            <!-- Iframe du radar -->
+            <iframe src="https://fshub.io/airline/AZH/radar" id="radarIframe" loading="lazy" width="100%" height="100%" style="border:none;"></iframe>
         </div>
-
-        <!-- RADAR FSHub intégré -->
-        <div class="info-box">
-            <h3 style="margin-bottom:10px;">Radar en temps réel</h3>
-            <iframe 
-                src="https://fshub.io/airline/AZH/radar" 
-                id="radarIframe"
-                loading="lazy">
-            </iframe>
-        </div>
-
-        <!-- Bouton pour basculer vers le radar -->
-        <button id="toggleMapButton" class="toggle-button">Afficher le Radar</button>
     </div>
 
-    <div id="map"></div>
+    <!-- Contenu de la page sans carte -->
+    <div id="content" style="flex-grow: 1; padding: 20px;">
+        <!-- Tout le contenu additionnel que tu souhaites ajouter -->
+    </div>
 
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script>
-        const callsignSelect = document.getElementById('callsign');
-        const customFields = document.getElementById('customCallsignFields');
-        const customAirline = document.getElementById('customAirline');
-        const customNumber = document.getElementById('customNumber');
-        const callsignDisplayPrefix = document.getElementById('callsignDisplayPrefix');
-        const callsignDisplayNumber = document.getElementById('callsignDisplayNumber');
-        const radarIframe = document.getElementById('radarIframe');
-        const mapContainer = document.getElementById('map');
-        const toggleMapButton = document.getElementById('toggleMapButton');
+        // Récupération des éléments HTML
+        const showRadarButton = document.getElementById('showRadarButton');
+        const radarContainer = document.getElementById('radarContainer');
         
-        // Fonction pour afficher la carte
-        function showMap() {
-            radarIframe.style.display = 'none';  // Masquer le radar
-            mapContainer.style.display = 'block'; // Afficher la carte
-        }
-
-        // Fonction pour afficher le radar
+        // Fonction pour afficher l'iframe du radar
         function showRadar() {
-            mapContainer.style.display = 'none';  // Masquer la carte
-            radarIframe.style.display = 'block';  // Afficher le radar
+            radarContainer.style.display = 'block';  // Afficher l'iframe du radar
         }
 
-        // Ajout de l'événement pour basculer entre la carte et le radar
-        toggleMapButton.addEventListener('click', function() {
-            if (mapContainer.style.display === 'none') {
-                showMap();
-                toggleMapButton.innerText = "Afficher le Radar";
-            } else {
-                showRadar();
-                toggleMapButton.innerText = "Afficher la Carte";
-            }
-        });
-
-        // Initialisation de la carte Leaflet
-        const map = L.map('map').setView([20, 0], 2);
-        L.tileLayer('https://{s}.tile.openstreetmap.fr/osmfr/{z}/{x}/{y}.png', {
-            attribution: '&copy; OpenStreetMap contributeurs'
-        }).addTo(map);
-
-        // Code pour gérer les entrées d'aéroport et calcul de la distance...
+        // Event listener pour afficher le radar lorsqu'on clique sur le bouton
+        showRadarButton.addEventListener('click', showRadar);
     </script>
 </body>
 </html>
